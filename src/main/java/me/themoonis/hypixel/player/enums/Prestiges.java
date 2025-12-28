@@ -1,0 +1,125 @@
+package me.themoonis.hypixel.player.enums;
+
+import lombok.Getter;
+import org.bukkit.ChatColor;
+
+import java.util.HashMap;
+
+public enum Prestiges {
+
+    PRES0(ChatColor.GRAY,10000,RenownThings.PRES0,0),
+    PRES1(new int[]{17,33,55,85,140,330,660,880,990,1100,1320,1650,-1},22000,ChatColor.BLUE, RenownThings.PRES1TO4, 10),
+    PRES2(new int[]{18,36,60,90,150,360,720,960,1080,1200,1440,1800,-1},24000,ChatColor.BLUE, RenownThings.PRES1TO4, 20),
+    PRES3(new int[]{20,39,65,100,165,390,780,1040,1170,1300,1560,1950,-1},26000,ChatColor.BLUE, RenownThings.PRES1TO4, 30),
+    PRES4(new int[]{21,42,70,105,175,420,840,1120,1260,1400,1680,2100,-1},28000,ChatColor.BLUE, RenownThings.PRES1TO4, 40),
+    PRES5(new int[]{23,45,75,115,190,450,900,1200,1350,1500,1800,2250,-1},30000,ChatColor.YELLOW, RenownThings.PRES5TO10, 50),
+    PRES6(new int[]{27,55,88,131,218,525,1050,1400,1575,1750,2100,2625,-1},70000,ChatColor.YELLOW, RenownThings.PRES5TO10, 75),
+    PRES7(new int[]{30,60,100,150,250,600,1200,1600,1800,2000,2400,3000,-1},80000,ChatColor.YELLOW, RenownThings.PRES5TO10, 100),
+    PRES8(new int[]{38,75,125,188,313,750,1500,2000,2250,2500,3000,3750,-1},100000,ChatColor.YELLOW, RenownThings.PRES5TO10, 150),
+    PRES9(new int[]{45,90,150,225,375,900,1800,2400,2700,3000,3600,4500,-1},120000,ChatColor.YELLOW, RenownThings.PRES5TO10, 200),
+
+    PRES10(new int[]{60,120,200,300,500,1200,2400,3200,3600,4000,4800,6000,-1},160000,ChatColor.GOLD, RenownThings.PRES5TO10, 300),
+    PRES11(new int[]{75,150,250,375,625,1500,3000,4000,4500,5000,6000,7500,-1},200000,ChatColor.GOLD, RenownThings.PRES11TO15, 400),
+    PRES12(new int[]{90,180,300,450,750,1800,3600,4800,5400,6000,7200,9000,-1},240000,ChatColor.GOLD, RenownThings.PRES11TO15, 500),
+    PRES13(new int[]{105,210,350,525,875,2100,4200,5600,6300,7000,8400,10500,-1},280000,ChatColor.GOLD, RenownThings.PRES11TO15, 600),
+    PRES14(new int[]{120,240,400,600,1000,2400,4800,6400,7200,8000,9600,12000,-1},320000,ChatColor.GOLD, RenownThings.PRES11TO15, 700),
+    PRES15(new int[]{135,270,450,675,1125,2700,5400,7200,8100,9000,10800,13500,-1},360000,ChatColor.RED, RenownThings.PRES16TO20, 800),
+    PRES16(new int[]{150,300,500,750,1250,3000,6000,8000,9000,10000,12000,15000,-1},400000,ChatColor.RED, RenownThings.PRES16TO20, 900),
+    PRES17(new int[]{180,360,600,900,1500,3600,7200,9600,10800,12000,14400,18000,-1},480000,ChatColor.RED, RenownThings.PRES16TO20, 1100),
+    PRES18(new int[]{210,420,700,1050,1750,4200,8400,11200,12600,14000,16800,21000,-1},560000,ChatColor.RED, RenownThings.PRES16TO20, 1300),
+    PRES19(new int[]{240,480,800,1200,2000,4800,9600,12800,14400,16000,19200,24000,-1},800000,ChatColor.RED, RenownThings.PRES16TO20, 1500),
+
+    PRES20(new int[]{270,540,900,1350,2250,5400,10800,14400,16200,18000,21600,27000,-1},900000,ChatColor.DARK_PURPLE, RenownThings.PRES16TO20, 1700),
+    PRES21(new int[]{300,600,1000,1500,2500,6000,12000,16000,18000,20000,24000,30000,-1},1000000,ChatColor.DARK_PURPLE, RenownThings.PRES21TO25, 1900),
+    PRES22(new int[]{360,720,1200,1800,3000,7200,14400,19200,21600,24000,28800,36000,-1},1200000,ChatColor.DARK_PURPLE, RenownThings.PRES21TO25, 2300),
+    PRES23(new int[]{420,840,1400,2100,3500,8400,16800,22400,25200,28000,33600,42000,-1},1400000,ChatColor.DARK_PURPLE, RenownThings.PRES21TO25, 2700),
+    PRES24(new int[]{480,960,1600,2400,4000,9600,19200,25600,28800,32000,38400,48000,-1},1600000,ChatColor.DARK_PURPLE, RenownThings.PRES21TO25, 3100),
+    PRES25(new int[]{540,1080,1800,2700,4500,10800,21600,28800,32400,36000,43200,54000,-1},1800000,ChatColor.LIGHT_PURPLE, RenownThings.PRES21TO25, 3500),
+    PRES26(new int[]{600,1200,2000,3000,5000,12000,24000,32000,36000,40000,48000,60000,-1},2400000,ChatColor.LIGHT_PURPLE, RenownThings.PRES26TO29, 3900),
+    PRES27(new int[]{675,1350,2250,3375,5625,13500,27000,36000,40500,45000,54000,67500,-1},2700000,ChatColor.LIGHT_PURPLE, RenownThings.PRES26TO29, 4400),
+    PRES28(new int[]{750,1500,2500,3750,6250,15000,30000,40000,45000,50000,60000,75000,-1},3000000,ChatColor.LIGHT_PURPLE, RenownThings.PRES26TO29, 4900),
+    PRES29(new int[]{1125,2250,3750,5625,9375,22500,45000,60000,67500,75000,90000,112500,-1},4500000,ChatColor.LIGHT_PURPLE, RenownThings.PRES26TO29, 7400),
+
+    PRES30(new int[]{1500,3000,5000,7500,12500,30000,60000,80000,90000,100000,120000,150000,-1},10000000,ChatColor.WHITE, RenownThings.PRES30, 9900),
+    PRES31(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},12120000,ChatColor.WHITE, RenownThings.PRES31TO35, 10000),
+    PRES32(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},14240000,ChatColor.WHITE, RenownThings.PRES31TO35, 10000),
+    PRES33(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},16360000,ChatColor.WHITE, RenownThings.PRES31TO35, 10000),
+    PRES34(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},18480000,ChatColor.WHITE, RenownThings.PRES31TO35, 10000),
+    PRES35(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},19890000,ChatColor.AQUA, RenownThings.PRES31TO35, 10000),
+    PRES36(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},20000000,ChatColor.AQUA, RenownThings.PRES36TO50, 15000),
+    PRES37(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},24500000,ChatColor.AQUA, RenownThings.PRES36TO50, 15000),
+    PRES38(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},27900000,ChatColor.AQUA, RenownThings.PRES36TO50, 15000),
+    PRES39(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},29290000,ChatColor.AQUA, RenownThings.PRES36TO50, 15000),
+
+    PRES40(new int[]{1500,3000,5000,7500,12500,30000,60000,80000,90000,100000,120000,150000,-1},30000000,ChatColor.DARK_BLUE, RenownThings.PRES36TO50, 15000),
+    PRES41(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},32900000,ChatColor.DARK_BLUE, RenownThings.PRES36TO50, 15000),
+    PRES42(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},34780000,ChatColor.DARK_BLUE, RenownThings.PRES36TO50, 15000),
+    PRES43(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},38850000,ChatColor.DARK_BLUE, RenownThings.PRES36TO50, 15000),
+    PRES44(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},39290000,ChatColor.DARK_BLUE, RenownThings.PRES36TO50, 15000),
+    PRES45(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},40000000,ChatColor.DARK_AQUA, RenownThings.PRES36TO50, 15000),
+    PRES46(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},40000000,ChatColor.DARK_AQUA, RenownThings.PRES36TO50, 15000),
+    PRES47(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},40000000,ChatColor.DARK_AQUA, RenownThings.PRES36TO50, 15000),
+    PRES48(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},40000000,ChatColor.DARK_AQUA, RenownThings.PRES36TO50, 15000),
+    PRES49(new int[]{1515,3030,5050,7575,12625,30300,60600,80800,90900,101000,121200,151500,-1},40000000,ChatColor.DARK_AQUA, RenownThings.PRES36TO50, 20000),
+    PRES50(new int[]{1515 * 2,3030 * 2,5050 * 2,7575 * 2,12625 * 2,30300 * 2,60600 * 2,80800 * 2,90900 * 2,
+            101000 * 2,121200 * 2,151500 * 2,-1},10000,ChatColor.DARK_RED,RenownThings.PRES36TO50, 10),
+
+
+    ;
+    @Getter
+    private int[] xpArray;
+    @Getter
+    private final int neededGold;
+    @Getter private final ChatColor color;
+    @Getter
+    private final int reward;
+    @Getter
+    private final int xpPercentage;
+
+    static HashMap<String,String> prestigeMap = new HashMap<>();
+    static {
+        int assignedNumber = values().length;
+        for(int i = 0; i < values().length; i++){
+            assignedNumber--;
+            prestigeMap.put(values()[i].name(),Integer.toString(assignedNumber));
+
+        }
+    }
+
+    Prestiges(int[] xpArray, int neededGold, ChatColor color, int reward, int xpPercentage) {
+
+        this.xpArray = xpArray;
+        this.neededGold = neededGold;
+        this.color = color;
+        this.reward = reward;
+        this.xpPercentage = xpPercentage;
+    }
+
+    Prestiges(ChatColor color, int neededGold, int reward, int xpPercentage) {
+        this.color = color;
+        this.neededGold = neededGold;
+        this.reward = reward;
+        this.xpPercentage = xpPercentage;
+    }
+    public static String getAssignedNumber(Prestiges prestige){
+
+
+        return prestigeMap.get(prestige.name());
+    }
+    public static class RenownThings{
+
+        public static final int PRES0 = 0;
+        public static final int PRES1TO4 = 10;
+        public static final int PRES5TO10 = 20;
+        public static final int PRES11TO15 = 30;
+        public static final int PRES16TO20 = 40;
+        public static final int PRES21TO25 = 50;
+        public static final int PRES26TO29 = 75;
+        public static final int PRES30 = 250;
+        public static final int PRES31TO35 = 100;
+        public static final int PRES36TO50 = 200;
+
+
+    }
+
+}

@@ -1,0 +1,4 @@
+name: HypixelPitRemake
+version: '1.0-SNAPSHOT'
+main: me.themoonis.hypixel.HypixelPitRemake
+api-version: '1.18'
