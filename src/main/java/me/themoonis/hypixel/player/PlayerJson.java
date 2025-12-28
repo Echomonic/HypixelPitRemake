@@ -21,7 +21,9 @@ public class PlayerJson {
     private PlayerLevel level;
     private PlayerPrestige prestige;
 
-    private int gold;
+    private int xp;
+
+    private double gold;
     private int bounty;
     private int renown;
 
@@ -42,6 +44,10 @@ public class PlayerJson {
         return prestige.getRawNumber() != 0;
     }
 
+    public String getFormattedLevel(boolean dash, boolean brackets){
+        return isPrestige() ? prestige.getFormattedText(dash) : level.getFormattedText(brackets);
+    }
+
     public static PlayerJson fromDomain(PlayerJsonDTO playerJsonDTO){
         PlayerLevel playerLevel = new PlayerLevel(playerJsonDTO.getLevel());
         PlayerPrestige playerPrestige = new PlayerPrestige(playerJsonDTO.getPrestige(),playerLevel);
@@ -52,6 +58,7 @@ public class PlayerJson {
                 playerJsonDTO.getRank(),
                 playerLevel,
                 playerPrestige,
+                playerJsonDTO.getXp(),
                 playerJsonDTO.getGold(),
                 playerJsonDTO.getBounty(),
                 playerJsonDTO.getRenown(),
@@ -68,6 +75,7 @@ public class PlayerJson {
                 rank,
                 level.getRawNumber(),
                 prestige.getRawNumber(),
+                xp,
                 gold,
                 bounty,
                 renown,

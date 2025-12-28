@@ -19,7 +19,9 @@ public class PlayerJsonDTO {
     private int level;
     private int prestige;
 
-    private int gold;
+    private int xp;
+
+    private double gold;
     private int bounty;
     private int renown;
 

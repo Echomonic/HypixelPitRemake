@@ -52,6 +52,7 @@ public class PlayerDataTracker {
                         0,
                         0,
                         0,
+                        0,
                         new ArrayList<>(),
                         new ArrayList<>(),
                         new HashMap<>())

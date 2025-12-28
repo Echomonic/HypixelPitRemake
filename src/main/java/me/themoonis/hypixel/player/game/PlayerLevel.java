@@ -24,6 +24,10 @@ public class PlayerLevel {
         return NeededXp.valueOf("LVL" + getBaseNumber());
     }
 
+    public int getLevelXp(){
+        return getInfo().getXp();
+    }
+
     public String getFormattedText(boolean brackets){
         String levelColor = getColor().toString();
         String levelText = rawNumber >= 50 ? levelColor + ChatColor.BOLD + rawNumber : levelColor + rawNumber;
