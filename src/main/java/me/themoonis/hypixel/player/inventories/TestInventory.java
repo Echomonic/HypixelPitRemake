@@ -8,6 +8,7 @@ import me.themoonis.hypixel.ui.button.UserInterfaceButton;
 import me.themoonis.hypixel.ui.item.ItemBuilder;
 import me.themoonis.hypixel.ui.managers.impl.PlayerManager;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -34,9 +35,16 @@ public class TestInventory extends AbstractUserInterface {
     }
 
     @Override
+    public void open(Player player) {
+        super.open(player);
+        player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT,1,2);
+    }
+
+    @Override
     public void loadButtons() {
         userInterfaceButtons.add(UserInterfaceButton
                 .builder()
+                        .slot(10)
                         .icon(ItemBuilder.build(Material.GRASS, icon -> {
                             icon.setDisplayName("&aMaterials");
                             icon.setLore(Arrays.asList(

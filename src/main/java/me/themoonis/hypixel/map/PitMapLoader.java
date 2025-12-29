@@ -47,7 +47,6 @@ public class PitMapLoader {
 
         if(chosenGameMap != null && chosenGameMap.isLoaded()) {
             Bukkit.getOnlinePlayers().forEach(action);
-
             chosenGameMap.unload();
         }
         String tempFolderId = pitMapFound.getName().replace(" ","_").toLowerCase();

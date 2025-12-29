@@ -25,8 +25,9 @@ public class LoadMapCommand {
 
         if (selectedMap) {
             sender.sendMessage(ChatColor.GREEN + "Success!");
-            plugin.setGameMap(mapLoader.getChosenGameMap());
             sender.sendMessage(ChatColor.YELLOW + "Loading map!");
+
+            plugin.setGameMap(mapLoader.getChosenGameMap());
             plugin.getGameMap().load();
         } else
             sender.sendMessage(ChatColor.RED + "The map could not be found.");

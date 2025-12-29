@@ -8,14 +8,12 @@ import me.themoonis.hypixel.map.TemporaryGameMap;
 import me.themoonis.hypixel.player.PlayerJson;
 import me.themoonis.hypixel.player.TagHandler;
 import me.themoonis.hypixel.player.enums.PlayerRank;
+import me.themoonis.hypixel.player.events.PlayerGainXpEvent;
 import me.themoonis.hypixel.player.game.PlayerLevel;
 import me.themoonis.hypixel.player.game.PlayerPrestige;
 import me.themoonis.hypixel.player.util.PlayerPackets;
 import me.themoonis.hypixel.utils.Text;
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.GameMode;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,6 +22,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 
 import java.text.NumberFormat;
 import java.util.concurrent.ThreadLocalRandom;
@@ -61,6 +60,13 @@ public class PlayerListener implements Listener {
         tagHandler.removePlayerTag(player);
         tracker.put(player.getUniqueId(), tracker.getOrCreate(player));
     }
+
+    @EventHandler
+    public void onRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        event.setRespawnLocation(gameMap.getMapConfiguration().getSpawnPoint().toBukkitPoint(gameMap.getWorld()));
+    }
+
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
@@ -112,25 +118,8 @@ public class PlayerListener implements Listener {
         double givenGold = Math.round(ThreadLocalRandom.current().nextDouble(5, 25));
 
         //For updating the scoreboard (when I add one.) we'll just subtract to get the difference.
-        if (killerJson.getLevel().getRawNumber() != 120) {
-            killerJson.setXp(killerJson.getXp() + givenXp);
-
-            int levelXp = killerJson.isPrestige() ? killerJson.getPrestige().getPrestigeXp() : killerJson.getLevel().getLevelXp();
-
-            int xpNeeded = levelXp - killerJson.getXp();
-
-            if(xpNeeded > 0) return;
-
-            String currentLevel = killerJson.getFormattedLevel(false,true);
-            killerJson.setLevel(killerJson.getLevel().getRawNumber() + 1);
-            String nextLevel = killerJson.getFormattedLevel(false,true);
-
-            PlayerPackets.title(killer, "&b&lLEVEL UP!",
-                    currentLevel + "&f➟" + nextLevel
-            );
-            killerJson.setXp(0);
-            tagHandler.refreshPlayerTag(killer);
-        }
+        if (killerJson.getLevel().getRawNumber() != 120)
+            Bukkit.getPluginManager().callEvent(new PlayerGainXpEvent(killer, givenXp));
 
         killerJson.setGold(killerJson.getGold() + givenGold);
         killerJson.getData().put("all_gold", (int) killerJson.getData().computeIfAbsent("all_gold", s -> 0) + givenGold);
@@ -143,8 +132,55 @@ public class PlayerListener implements Listener {
 
         killer.playSound(killer.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 2);
 
-        player.spigot().respawn();
-        player.teleport(gameMap.getMapConfiguration().getSpawnPoint().toBukkitPoint(gameMap.getWorld()));
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            player.spigot().respawn();
+            player.teleport(gameMap.getMapConfiguration().getSpawnPoint().toBukkitPoint(gameMap.getWorld()));
+        }, 1);
+    }
+
+    @EventHandler
+    public void onPlayerXpGain(PlayerGainXpEvent event) {
+        Player killer = event.getPlayer();
+        int givenXp = event.getGainedXp();
+        PlayerJson killerJson = tracker.get(killer.getUniqueId());
+
+        int killerXp = killerJson.getXp();
+        killerJson.setXp(killerXp + givenXp);
+
+        handleLevelUp(killer, killerJson);
+    }
+
+    private void handleLevelUp(Player killer, PlayerJson killerJson) {
+        if (killerJson.getLevel().getRawNumber() == 120) return;
+
+        int levelXp = killerJson.isPrestige() ? killerJson.getPrestige().getPrestigeXp() : killerJson.getLevel().getLevelXp();
+        int killerXp = killerJson.getXp();
+        int xpNeeded = levelXp - killerXp;
+
+        if (xpNeeded > 0) return;
+
+        String currentLevel = killerJson.getFormattedLevel(false, true);
+
+        killerJson.setLevel(killerJson.getLevel().getRawNumber() + 1);
+        String nextLevel = killerJson.getFormattedLevel(false, true);
+
+        PlayerPackets.title(killer, "&b&lLEVEL UP!",
+                currentLevel + " &f➟ " + nextLevel
+        );
+        int xpReset = 0;
+        boolean recursiveLevel = false;
+
+        if (killerXp > levelXp) {
+            xpReset = killerXp - levelXp;
+            recursiveLevel = true;
+        }
+
+        killerJson.setXp(xpReset);
+
+        if (recursiveLevel)
+            handleLevelUp(killer, killerJson);
+
+        tagHandler.refreshPlayerTag(killer);
     }
 
 }

@@ -116,7 +116,6 @@ public class MapConfigurationCommand {
     private void save(Player player) {
         TemporaryGameMap gameMap = plugin.getGameMap();
         gameMap.saveConfiguration();
-        ;
         player.sendMessage(Text.pit("PIT MAP", "&aSuccessfully &7saved configuration!", ChatColor.DARK_AQUA));
         player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 2);
     }

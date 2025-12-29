@@ -3,12 +3,9 @@ package me.themoonis.hypixel;
 import dev.echo.concept.api.ArgumentParser;
 import dev.echo.concept.impl.CommandRegistry;
 import dev.echo.concept.impl.ParserRegistry;
-import dev.echo.concept.impl.parsers.BooleanParser;
-import dev.echo.concept.impl.parsers.NumberParser;
 import lombok.Getter;
 import lombok.Setter;
 import me.themoonis.hypixel.commands.*;
-import me.themoonis.hypixel.commands.parsers.DebugStringParser;
 import me.themoonis.hypixel.commands.parsers.ObjectParser;
 import me.themoonis.hypixel.commands.parsers.PlayerRankParser;
 import me.themoonis.hypixel.json.trackers.PlayerDataTracker;
@@ -17,6 +14,7 @@ import me.themoonis.hypixel.map.PitMapLoader;
 import me.themoonis.hypixel.map.TemporaryGameMap;
 import me.themoonis.hypixel.player.TagHandler;
 import me.themoonis.hypixel.player.enums.PlayerRank;
+import me.themoonis.hypixel.ui.listener.InventoryListener;
 import me.themoonis.hypixel.utils.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -58,13 +56,24 @@ public final class HypixelPitRemake extends JavaPlugin {
         tagHandler = new TagHandler(this);
 
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new InventoryListener(),this);
         Bukkit.getConsoleSender().sendMessage(Text.pit("HYPIXEL PIT", "&aSuccessfully &7loaded up plugin.", ChatColor.YELLOW));
 
         parserRegistry = registerParsers();
         CommandRegistry commandRegistry = new CommandRegistry(parserRegistry);
-        Class<?>[] commandClasses = new Class[]{RankCommand.class, LevelCommand.class, PrestigeCommand.class, LoadMapCommand.class, MapConfigurationCommand.class};
+        Class<?>[] commandClasses = new Class[]{
+                RankCommand.class,
+                LevelCommand.class,
+                PrestigeCommand.class,
+                LoadMapCommand.class,
+                MapConfigurationCommand.class,
+                TestCommand.class,
+                XpCommand.class
+        };
+
         for (Class<?> commandClass : commandClasses)
             commandRegistry.register("hypixelcommand", commandClass);
+
         Bukkit.getOnlinePlayers().forEach(player -> {
             playerDataTracker.getOrCreate(player);
 
@@ -72,14 +81,14 @@ public final class HypixelPitRemake extends JavaPlugin {
                 Bukkit.getConsoleSender().sendMessage(
                         Text.pit("HYPIXEL PIT DEBUG",
                                 "&aLoaded &7player data for &3%s&7.",
-                                ChatColor.AQUA,player.getName()));
+                                ChatColor.AQUA, player.getName()));
         });
     }
 
     @Override
     public void onDisable() {
-        if(parserRegistry != null)
-        parserRegistry.unload();
+        if (parserRegistry != null)
+            parserRegistry.unload();
 
         gameMap.unload();
         gameMap = null;
@@ -94,8 +103,8 @@ public final class HypixelPitRemake extends JavaPlugin {
         if (DEBUG)
             Bukkit.getConsoleSender().sendMessage(
                     Text.pit("HYPIXEL PIT DEBUG",
-                    "&aSaved &7player data for &3%s&7.",
-                    ChatColor.AQUA,player.getName()));
+                            "&aSaved &7player data for &3%s&7.",
+                            ChatColor.AQUA, player.getName()));
     }
 
     private ParserRegistry registerParsers() {
