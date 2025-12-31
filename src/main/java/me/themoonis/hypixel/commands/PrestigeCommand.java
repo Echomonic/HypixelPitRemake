@@ -15,14 +15,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 @PlayerAccessible
-@Command("prestige")
+@Command({"prestige","pres"})
 
 public class PrestigeCommand {
 
     private final HypixelPitRemake plugin = HypixelPitRemake.getPlugin(HypixelPitRemake.class);
 
-    private void base(CommandSender sender, @Arg OfflinePlayer target, @Arg("required=false") int prestige){
+    private void base(CommandSender sender, @Arg int prestige, @Arg("required=false") OfflinePlayer offlineTarget){
         PlayerDataTracker playerTracker = plugin.getPlayerDataTracker();
+
+        OfflinePlayer target = offlineTarget;
 
         if(sender instanceof Player){
             Player player = ((Player) sender);
@@ -30,6 +32,9 @@ public class PrestigeCommand {
                 player.sendMessage(Text.color("&cYou cannot do this."));
                 return;
             }
+
+            if(target == null)
+                target = player;
         }
 
         PlayerJson targetData = playerTracker.getOrCreate(target);

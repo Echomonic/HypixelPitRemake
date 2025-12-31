@@ -69,7 +69,6 @@ public abstract class AbstractUserInterface implements IUserInterface, IUserInte
 
     @Override
     public void open(Player player) {
-        addPlayer(player.getUniqueId());
         player.openInventory(inventory);
     }
 

@@ -9,6 +9,7 @@ import me.themoonis.hypixel.utils.Text;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 
@@ -17,8 +18,18 @@ public class LoadMapCommand {
 
     private final HypixelPitRemake plugin = HypixelPitRemake.getPlugin(HypixelPitRemake.class);
 
-    private void base(CommandSender sender, @Arg String map) {
+    private void base(CommandSender sender, @Arg("required=false") String map) {
         PitMapLoader mapLoader = plugin.getPitMapLoader();
+
+        if(map == null){
+            String worldName = plugin.getGameMap().getWorld().getName();
+
+            String mapName = Arrays.stream(mapLoader.getMapDirectoryNames())
+                    .filter(worldName::contains).findFirst().orElse("&cerror");
+
+            sender.sendMessage(Text.pit("PIT MAP LOADER","Currently loaded map: &b%s",ChatColor.YELLOW,mapName));
+            return;
+        }
 
         boolean selectedMap = mapLoader.loadPitMap(map, player ->
                 player.kickPlayer(Text.pit("MAP CHANGE", "The map is being changed!", ChatColor.YELLOW)));

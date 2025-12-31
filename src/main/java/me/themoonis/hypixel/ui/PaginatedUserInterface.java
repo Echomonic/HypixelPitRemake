@@ -22,8 +22,8 @@ public abstract class PaginatedUserInterface extends AbstractUserInterface {
 
     private int leftSlot, rightSlot;
 
-    protected PaginatedUserInterface(PlayerManager playerManager, UserInterfaceData<?> data) {
-        super(playerManager, data);
+    protected PaginatedUserInterface(UserInterfaceData<?> data) {
+        super(null, data);
 
         int size = getInventory().getSize();
         int slotIndex = (size - 9) / 9;
@@ -70,8 +70,8 @@ public abstract class PaginatedUserInterface extends AbstractUserInterface {
         if (stacks == null) return;
         if (page > 0)
             userInterfaceButtons.add(UserInterfaceButton.builder().icon(ItemBuilder.build(Material.ARROW, builder -> {
-                builder.setDisplayName("<green><--");
-                builder.setLore("<gray>Go back a page");
+                builder.setDisplayName("&a<--");
+                builder.setLore("&7Go back a page");
             })).action((viewer, item, slot) -> {
                 if (page - 1 >= 0)
                     page -= 1;
@@ -84,10 +84,10 @@ public abstract class PaginatedUserInterface extends AbstractUserInterface {
 
         if (stacks.isEmpty()) return;
 
-        if (!(index > stacks.size()))
+        if (!(index - 1 > stacks.size()))
             userInterfaceButtons.add(UserInterfaceButton.builder().icon(ItemBuilder.build(Material.ARROW, builder -> {
-                builder.setDisplayName("<green>-->");
-                builder.setLore("<gray>Go forward a page");
+                builder.setDisplayName("&a-->");
+                builder.setLore("&7Go forward a page");
             })).action((viewer, item, slot) -> {
                 page += 1;
                 viewer.playSound(viewer.getLocation(), Sound.CLICK,1,2f);

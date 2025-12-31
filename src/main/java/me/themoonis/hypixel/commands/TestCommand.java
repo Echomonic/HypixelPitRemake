@@ -29,7 +29,7 @@ public class TestCommand {
         }
         Player player = (Player) sender;
 
-        new TestInventory(new PlayerManager(plugin)).open(player);
+        new TestInventory().open(player);
         player.sendMessage(ChatColor.YELLOW + "Opening menu.");
     }
 

@@ -2,6 +2,8 @@ package me.themoonis.hypixel.player;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import me.themoonis.hypixel.player.enums.PlayerRank;
 
 import java.util.HashMap;
@@ -9,7 +11,8 @@ import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 public class PlayerJsonDTO {
 
     private final UUID uuid;

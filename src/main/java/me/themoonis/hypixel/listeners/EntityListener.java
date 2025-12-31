@@ -12,5 +12,4 @@ public class EntityListener implements Listener {
         if(event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.CUSTOM) event.setCancelled(true);
     }
 
-
 }

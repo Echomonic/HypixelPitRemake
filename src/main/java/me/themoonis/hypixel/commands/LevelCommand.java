@@ -21,20 +21,25 @@ public class LevelCommand {
 
     private final HypixelPitRemake plugin = HypixelPitRemake.getPlugin(HypixelPitRemake.class);
 
-    private void base(CommandSender sender, @Arg OfflinePlayer target, @Arg("required=false") int level){
+    private void base(CommandSender sender, @Arg int level, @Arg("required=false") OfflinePlayer targetOffline){
         PlayerDataTracker playerTracker = plugin.getPlayerDataTracker();
+
+        OfflinePlayer target = targetOffline;
 
         if(sender instanceof Player){
             Player player = ((Player) sender);
+
             if(playerTracker.get(player.getUniqueId()).getRank() != PlayerRank.ADMIN){
                 player.sendMessage(Text.color("&cYou cannot do this."));
                 return;
             }
+            if(target == null)
+                target = player;
         }
 
         PlayerJson targetData = playerTracker.getOrCreate(target);
         targetData.setLevel(level);
-
+        targetData.setXp(0);
         if(target.isOnline()) {
             Player onlineTarget = target.getPlayer();
             TagHandler tagHandler = plugin.getTagHandler();

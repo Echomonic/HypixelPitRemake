@@ -19,14 +19,12 @@ import java.util.stream.Collectors;
 public class TestInventory extends AbstractUserInterface {
 
 
-    private final PlayerManager playerManager;
 
-    public TestInventory(PlayerManager playerManager) {
-        super(playerManager, UserInterfaceData.create(data -> {
+    public TestInventory() {
+        super(null, UserInterfaceData.create(data -> {
             data.addContextObject("title","Test Menu");
             data.addContextObject("size",27);
         }));
-        this.playerManager = playerManager;
     }
 
     @Override
@@ -54,7 +52,7 @@ public class TestInventory extends AbstractUserInterface {
                             ));
                         }))
                         .action((viewer, icon, slot) -> {
-                            new PaginatedUserInterface(playerManager, UserInterfaceData.create(data -> {
+                            new PaginatedUserInterface(UserInterfaceData.create(data -> {
                                 data.addContextObject("title","Materials");
                                 data.addContextObject("size",54);
                             })){
@@ -65,8 +63,9 @@ public class TestInventory extends AbstractUserInterface {
                                         player.getInventory().addItem(event.getCurrentItem());
                                         event.setCancelled(true);
                                     });
-
-                                    stacks(Arrays.stream(Material.values()).map(ItemStack::new).collect(Collectors.toList()));
+                                    stacks(Arrays.stream(Material.values())
+                                            .filter(material -> material != Material.AIR)
+                                            .map(ItemStack::new).collect(Collectors.toList()));
                                 }
 
                                 @Override

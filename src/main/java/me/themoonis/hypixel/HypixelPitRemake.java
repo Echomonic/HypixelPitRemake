@@ -9,13 +9,18 @@ import me.themoonis.hypixel.commands.*;
 import me.themoonis.hypixel.commands.parsers.ObjectParser;
 import me.themoonis.hypixel.commands.parsers.PlayerRankParser;
 import me.themoonis.hypixel.json.trackers.PlayerDataTracker;
+import me.themoonis.hypixel.listeners.BlockListener;
 import me.themoonis.hypixel.listeners.PlayerListener;
 import me.themoonis.hypixel.map.PitMapLoader;
 import me.themoonis.hypixel.map.TemporaryGameMap;
 import me.themoonis.hypixel.player.TagHandler;
 import me.themoonis.hypixel.player.enums.PlayerRank;
+import me.themoonis.hypixel.player.sidebar.SidebarHandler;
 import me.themoonis.hypixel.ui.listener.InventoryListener;
 import me.themoonis.hypixel.utils.Text;
+import net.megavex.scoreboardlibrary.api.ScoreboardLibrary;
+import net.megavex.scoreboardlibrary.api.exception.NoPacketAdapterAvailableException;
+import net.megavex.scoreboardlibrary.api.noop.NoopScoreboardLibrary;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -41,12 +46,24 @@ public final class HypixelPitRemake extends JavaPlugin {
     @Getter
     private TagHandler tagHandler;
 
+    @Getter
+    private SidebarHandler sidebarHandler;
+
+    @Getter
+    private ScoreboardLibrary scoreboardLibrary;
+
     private ParserRegistry parserRegistry;
 
     @Override
     public void onEnable() {
         this.playerDataTracker = new PlayerDataTracker(getDataFolder().toPath());
+        this.sidebarHandler = new SidebarHandler();
 
+        try{
+            scoreboardLibrary = ScoreboardLibrary.loadScoreboardLibrary(this);
+        }catch (NoPacketAdapterAvailableException e){
+            scoreboardLibrary = new NoopScoreboardLibrary();
+        }
         pitMapLoader = new PitMapLoader(Bukkit.getWorldContainer().toPath().resolve("Pit Maps"));
         pitMapLoader.choose();
 
@@ -57,6 +74,7 @@ public final class HypixelPitRemake extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
         Bukkit.getPluginManager().registerEvents(new InventoryListener(),this);
+        Bukkit.getPluginManager().registerEvents(new BlockListener(this),this);
         Bukkit.getConsoleSender().sendMessage(Text.pit("HYPIXEL PIT", "&aSuccessfully &7loaded up plugin.", ChatColor.YELLOW));
 
         parserRegistry = registerParsers();
@@ -68,7 +86,8 @@ public final class HypixelPitRemake extends JavaPlugin {
                 LoadMapCommand.class,
                 MapConfigurationCommand.class,
                 TestCommand.class,
-                XpCommand.class
+                XpCommand.class,
+                AdminSettingCommand.class
         };
 
         for (Class<?> commandClass : commandClasses)
@@ -83,10 +102,14 @@ public final class HypixelPitRemake extends JavaPlugin {
                                 "&aLoaded &7player data for &3%s&7.",
                                 ChatColor.AQUA, player.getName()));
         });
+        sidebarHandler.start(this);
     }
 
     @Override
     public void onDisable() {
+        scoreboardLibrary.close();
+        sidebarHandler.clear();
+
         if (parserRegistry != null)
             parserRegistry.unload();
 
@@ -95,6 +118,8 @@ public final class HypixelPitRemake extends JavaPlugin {
 
         Bukkit.getOnlinePlayers().forEach(this::saveOnlinePlayer);
         Bukkit.getConsoleSender().sendMessage(Text.pit("HYPIXEL PIT", "&aSuccessfully &7unloaded up plugin.", ChatColor.YELLOW));
+
+        playerDataTracker.flush();
     }
 
     private void saveOnlinePlayer(Player player) {

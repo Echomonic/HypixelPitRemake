@@ -2,7 +2,9 @@ package me.themoonis.hypixel.map;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import me.themoonis.hypixel.utils.Text;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -35,6 +37,8 @@ public class PitMapLoader {
         File chosen = children[index];
 
         String mapName = chosen.getName().replace(" ","_").toLowerCase();
+
+        Bukkit.getConsoleSender().sendMessage(Text.pit("PIT MAP LOADER","Loaded &b%s&7!", ChatColor.YELLOW,mapName));
 
         chosenGameMap = new TemporaryGameMap(root.toFile(),mapName,false);
     }

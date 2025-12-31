@@ -16,16 +16,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class PlayerDataTracker {
 
     private final ObjectNode root;
     private final Path rootPath;
-    private final Executor io = Executors.newSingleThreadExecutor();
+    private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final Map<UUID, PlayerJson> trackerMap = new ConcurrentHashMap<>();
+
+    private final Object lock = new Object();
 
     @SneakyThrows
     public PlayerDataTracker(Path root) {
@@ -42,7 +42,7 @@ public class PlayerDataTracker {
     }
 
     public PlayerJson getOrCreate(OfflinePlayer player) {
-        return trackerMap.computeIfAbsent(player.getUniqueId(), uuid -> PlayerJson.fromDomain(
+        return loadPlayerSync(player.getUniqueId()) == null ? trackerMap.computeIfAbsent(player.getUniqueId(), uuid -> PlayerJson.fromDomain(
                 new PlayerJsonDTO(
                         uuid,
                         player.getName(),
@@ -56,11 +56,21 @@ public class PlayerDataTracker {
                         new ArrayList<>(),
                         new ArrayList<>(),
                         new HashMap<>())
-        ));
+        )) : loadPlayerSync(player.getUniqueId());
     }
 
     public PlayerJson get(UUID player) {
         return trackerMap.computeIfAbsent(player, this::loadPlayerSync);
+    }
+
+    public void flush(){
+        io.shutdown();
+        try{
+            if(!io.awaitTermination(5, TimeUnit.SECONDS))
+                io.shutdownNow();
+        }catch (InterruptedException e){
+            io.shutdownNow();
+        }
     }
 
     public void put(UUID player, PlayerJson object) {
@@ -71,19 +81,31 @@ public class PlayerDataTracker {
     private void saveAsync(UUID player) {
         PlayerJson snapshot = trackerMap.computeIfAbsent(player, this::loadPlayerSync);
         io.execute(() -> {
-            root.set(player.toString(), Jsons.MAPPER.valueToTree(snapshot.toDto()));
-            try {
-                Jsons.MAPPER.writerWithDefaultPrettyPrinter().writeValue(rootPath.toFile(), root);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            synchronized (lock) {
+                root.set(player.toString(), Jsons.MAPPER.valueToTree(snapshot.toDto()));
+                try {
+                    Jsons.MAPPER.writerWithDefaultPrettyPrinter().writeValue(rootPath.toFile(), root);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
 
     private PlayerJson loadPlayerSync(UUID p) {
-        JsonNode playerNode = root.get(p.toString());
-        PlayerJsonDTO playerJson = Jsons.MAPPER.convertValue(playerNode, PlayerJsonDTO.class);
-        return PlayerJson.fromDomain(playerJson);
+        synchronized (lock) {
+            try{
+                JsonNode playerNode = root.get(p.toString());
+                PlayerJsonDTO playerJson = Jsons.MAPPER.convertValue(playerNode, PlayerJsonDTO.class);
+
+                if(playerJson == null)
+                    return null;
+
+                return PlayerJson.fromDomain(playerJson);
+            }catch (IllegalArgumentException e){
+                return null;
+            }
+        }
     }
 
 }

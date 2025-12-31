@@ -22,7 +22,6 @@ public class TemporaryGameMap {
     private File activeWorldFolder;
 
     private World bukkitWorld;
-    @Getter
     private MapConfiguration mapConfiguration;
 
     public TemporaryGameMap(File worldFolder, String worldName, boolean loadOnInit) {
@@ -39,30 +38,12 @@ public class TemporaryGameMap {
 
         FileUtils.copyDirectory(sourceWorldFolder, activeWorldFolder);
 
-        File configurationFile = new File(sourceWorldFolder,"configuration.json");
-
-        if(!configurationFile.exists()) {
-            Bukkit.getConsoleSender().sendMessage(Text.pit("PIT MAP LOADER",
-                    "No configuration was found for: " + sourceWorldFolder.getName(),
-                    ChatColor.YELLOW));
-            Bukkit.getConsoleSender().sendMessage(Text.pit("PIT MAP LOADER","Creating configuration for map...",ChatColor.YELLOW));
-            MapConfiguration defaultConfiguration = new MapConfiguration(
-                    new WorldPoint(0,100,0,0,90),
-                    new WorldPoint(0,100,0,0,90),
-                    new HashMap<>());
-
-            configurationFile.createNewFile();
-
-            Jsons.MAPPER.writerWithDefaultPrettyPrinter().writeValue(configurationFile,defaultConfiguration);
-
-            this.mapConfiguration = defaultConfiguration;
-            return false;
-        }
-        this.mapConfiguration = Jsons.MAPPER.readValue(configurationFile, MapConfiguration.class);
+        loadConfiguration();
 
         this.bukkitWorld = Bukkit.createWorld(new WorldCreator(activeWorldFolder.getName()));
         if (bukkitWorld != null)
             this.bukkitWorld.setAutoSave(false);
+
 
         return isLoaded();
     }
@@ -100,4 +81,37 @@ public class TemporaryGameMap {
         return bukkitWorld;
     }
 
+    public MapConfiguration getMapConfiguration() {
+        if(this.mapConfiguration == null) {
+            loadConfiguration();
+            return mapConfiguration;
+        }
+
+        return mapConfiguration;
+    }
+
+    @SneakyThrows
+    private void loadConfiguration(){
+        File configurationFile = new File(sourceWorldFolder,"configuration.json");
+
+        if(!configurationFile.exists()) {
+            Bukkit.getConsoleSender().sendMessage(Text.pit("PIT MAP LOADER",
+                    "No configuration was found for: " + sourceWorldFolder.getName(),
+                    ChatColor.YELLOW));
+            Bukkit.getConsoleSender().sendMessage(Text.pit("PIT MAP LOADER","Creating configuration for map...",ChatColor.YELLOW));
+            MapConfiguration defaultConfiguration = new MapConfiguration(
+                    new WorldPoint(0,100,0,0,90),
+                    new WorldPoint(0,100,0,0,90),
+                    new HashMap<>());
+
+            configurationFile.createNewFile();
+
+            Jsons.MAPPER.writerWithDefaultPrettyPrinter().writeValue(configurationFile,defaultConfiguration);
+
+            this.mapConfiguration = defaultConfiguration;
+            return;
+        }
+        this.mapConfiguration = Jsons.MAPPER.readValue(configurationFile, MapConfiguration.class);
+        Bukkit.getConsoleSender().sendMessage(Text.pit("PIT MAP LOADER","Loaded configuration for &a%s&7.",ChatColor.YELLOW, sourceWorldFolder.getName()));
+    }
 }

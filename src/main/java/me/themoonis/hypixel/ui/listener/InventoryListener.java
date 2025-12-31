@@ -28,16 +28,6 @@ public class InventoryListener implements Listener {
     }
 
     @EventHandler
-    public void onInventoryOpen(InventoryOpenEvent event) {
-        Player player = (Player) event.getPlayer();
-
-        if (event.getInventory().getHolder() instanceof IUserInterface) {
-            IUserInterface userInterface = (IUserInterface) event.getInventory().getHolder();
-            userInterface.addPlayer(player.getUniqueId());
-        }
-    }
-
-    @EventHandler
     public void onInventoryClick(InventoryCloseEvent event) {
         Inventory inventory = event.getInventory();
         InventoryHolder holder = inventory.getHolder();
@@ -49,7 +39,6 @@ public class InventoryListener implements Listener {
                 closeAction.run(event);
                 return;
             }
-            userInterface.removePlayer(event.getPlayer().getUniqueId());
         }
     }
 

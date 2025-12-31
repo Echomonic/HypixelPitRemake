@@ -1,9 +1,7 @@
 package me.themoonis.hypixel.listeners;
 
-import lombok.RequiredArgsConstructor;
 import me.themoonis.hypixel.HypixelPitRemake;
 import me.themoonis.hypixel.json.trackers.PlayerDataTracker;
-import me.themoonis.hypixel.map.PitMapLoader;
 import me.themoonis.hypixel.map.TemporaryGameMap;
 import me.themoonis.hypixel.player.PlayerJson;
 import me.themoonis.hypixel.player.TagHandler;
@@ -11,10 +9,14 @@ import me.themoonis.hypixel.player.enums.PlayerRank;
 import me.themoonis.hypixel.player.events.PlayerGainXpEvent;
 import me.themoonis.hypixel.player.game.PlayerLevel;
 import me.themoonis.hypixel.player.game.PlayerPrestige;
+import me.themoonis.hypixel.player.sidebar.PlayerSidebar;
 import me.themoonis.hypixel.player.util.PlayerPackets;
 import me.themoonis.hypixel.utils.Text;
-import org.bukkit.*;
-import org.bukkit.entity.EntityType;
+import net.megavex.scoreboardlibrary.api.sidebar.Sidebar;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -52,12 +54,21 @@ public class PlayerListener implements Listener {
         tagHandler.generatePrefix(player);
         tagHandler.displayPlayerTag(player);
         tagHandler.displayOtherTags(player);
+
+        Sidebar sidebar = plugin.getScoreboardLibrary().createSidebar();
+        sidebar.addPlayer(player);
+
+        plugin.getSidebarHandler().add(player.getUniqueId(),new PlayerSidebar(tracker.get(player.getUniqueId()),sidebar));
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         tagHandler.removePlayerTag(player);
+
+        plugin.getSidebarHandler().get(player.getUniqueId()).close();
+        plugin.getSidebarHandler().remove(player.getUniqueId());
+
         tracker.put(player.getUniqueId(), tracker.getOrCreate(player));
     }
 
@@ -117,7 +128,6 @@ public class PlayerListener implements Listener {
         int givenXp = 5 + ThreadLocalRandom.current().nextInt(5, 10);
         double givenGold = Math.round(ThreadLocalRandom.current().nextDouble(5, 25));
 
-        //For updating the scoreboard (when I add one.) we'll just subtract to get the difference.
         if (killerJson.getLevel().getRawNumber() != 120)
             Bukkit.getPluginManager().callEvent(new PlayerGainXpEvent(killer, givenXp));
 
@@ -147,11 +157,16 @@ public class PlayerListener implements Listener {
         int killerXp = killerJson.getXp();
         killerJson.setXp(killerXp + givenXp);
 
-        handleLevelUp(killer, killerJson);
+        String currentLevel = killerJson.getFormattedLevel(false, true);
+
+        handleLevelUp(killer,currentLevel, killerJson);
     }
 
-    private void handleLevelUp(Player killer, PlayerJson killerJson) {
-        if (killerJson.getLevel().getRawNumber() == 120) return;
+    private void handleLevelUp(Player killer,String currentLevel, PlayerJson killerJson) {
+        if (killerJson.getLevel().getRawNumber() == 120){
+            killerJson.setXp(0);
+            return;
+        }
 
         int levelXp = killerJson.isPrestige() ? killerJson.getPrestige().getPrestigeXp() : killerJson.getLevel().getLevelXp();
         int killerXp = killerJson.getXp();
@@ -159,7 +174,6 @@ public class PlayerListener implements Listener {
 
         if (xpNeeded > 0) return;
 
-        String currentLevel = killerJson.getFormattedLevel(false, true);
 
         killerJson.setLevel(killerJson.getLevel().getRawNumber() + 1);
         String nextLevel = killerJson.getFormattedLevel(false, true);
@@ -171,14 +185,14 @@ public class PlayerListener implements Listener {
         boolean recursiveLevel = false;
 
         if (killerXp > levelXp) {
-            xpReset = killerXp - levelXp;
+            xpReset = Math.max(killerXp - levelXp,0);
             recursiveLevel = true;
         }
 
         killerJson.setXp(xpReset);
 
         if (recursiveLevel)
-            handleLevelUp(killer, killerJson);
+            handleLevelUp(killer,currentLevel, killerJson);
 
         tagHandler.refreshPlayerTag(killer);
     }
