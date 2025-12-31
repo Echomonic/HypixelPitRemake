@@ -5,6 +5,7 @@ import me.themoonis.hypixel.json.trackers.PlayerDataTracker;
 import me.themoonis.hypixel.map.TemporaryGameMap;
 import me.themoonis.hypixel.player.PlayerJson;
 import me.themoonis.hypixel.player.TagHandler;
+import me.themoonis.hypixel.player.enums.NeededXp;
 import me.themoonis.hypixel.player.enums.PlayerRank;
 import me.themoonis.hypixel.player.events.PlayerGainXpEvent;
 import me.themoonis.hypixel.player.game.PlayerLevel;
@@ -20,13 +21,19 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class PlayerListener implements Listener {
@@ -50,6 +57,7 @@ public class PlayerListener implements Listener {
         Player player = event.getPlayer();
         player.setGameMode(GameMode.SPECTATOR);
         player.teleport(gameMap.getMapConfiguration().getSpawnPoint().toBukkitPoint(gameMap.getWorld()));
+        event.setJoinMessage(null);
         tracker.put(player.getUniqueId(), tracker.getOrCreate(player));
         tagHandler.generatePrefix(player);
         tagHandler.displayPlayerTag(player);
@@ -64,6 +72,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        event.setQuitMessage(null);
         tagHandler.removePlayerTag(player);
 
         plugin.getSidebarHandler().get(player.getUniqueId()).close();
@@ -74,10 +83,8 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
-        Player player = event.getPlayer();
         event.setRespawnLocation(gameMap.getMapConfiguration().getSpawnPoint().toBukkitPoint(gameMap.getWorld()));
     }
-
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
@@ -112,40 +119,70 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onDamageEvent(EntityDamageByEntityEvent event){
+        if(!(event.getEntity() instanceof Player)) return;
+
+        Player player = (Player) event.getEntity();
+
+        if(event.getFinalDamage() >= player.getHealth()){
+            event.setCancelled(true);
+            player.setHealth(20);
+
+            player.teleport(gameMap.getMapConfiguration().getSpawnPoint().toBukkitPoint(gameMap.getWorld()));
+            PlayerPackets.title(player,"&c&lYOU DIED!");
+
+            Player killer = player.getKiller();
+            if (killer == null) return;
+
+            PlayerJson killerJson = tracker.get(killer.getUniqueId());
+            PlayerJson playerJson = tracker.get(player.getUniqueId());
+
+            HashMap<String,Object> killerData = killerJson.getData();
+
+            PlayerPackets.bar(killer, playerJson.getRank().getColor() + player.getName() + " &a&lKILL!");
+
+            int givenXp = (5 + ThreadLocalRandom.current().nextInt(5, 10));
+            double givenGold = new BigDecimal(Double.toString(ThreadLocalRandom.current().nextDouble(5, 25)))
+                    .setScale(2, RoundingMode.HALF_UP)
+                    .doubleValue();
+
+            if (killerJson.getLevel().getRawNumber() != 120)
+                Bukkit.getPluginManager().callEvent(new PlayerGainXpEvent(killer, givenXp));
+
+            killerJson.setGold(killerJson.getGold() + givenGold);
+            killerData.put("all_gold", (double)killerData.computeIfAbsent("all_gold", s -> 0.0) + givenGold);
+
+            String message = String.format("on %s &b+%sXP &6+%sg",
+                    playerJson.getFormattedLevel(false, true) + " " + playerJson.getRank().getColor() + player.getName(),
+                    givenXp, NumberFormat.getInstance().format(givenGold));
+
+            killer.sendMessage(Text.pit("KILL", message, ChatColor.GREEN));
+
+            killer.playSound(killer.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 2);
+        }
+    }
+
+    @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         event.setKeepInventory(true);
         event.setDeathMessage(null);
         event.setDroppedExp(0);
+        event.getEntity().teleport(gameMap.getMapConfiguration().getSpawnPoint().toBukkitPoint(gameMap.getWorld()));
+    }
 
-        Player player = event.getEntity();
-        Player killer = player.getKiller();
-        if (killer == null) return;
+    @EventHandler
+    public void onEntityDamageEvent(EntityDamageEvent event){
+        if(!(event.getEntity() instanceof Player)) return;
+        if(event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
 
-        PlayerJson killerJson = tracker.get(killer.getUniqueId());
-        PlayerJson playerJson = tracker.get(player.getUniqueId());
+        event.setCancelled(true);
+    }
 
-        PlayerPackets.bar(killer, playerJson.getRank().getColor() + player.getName() + " &a&lKILL!");
-        int givenXp = 5 + ThreadLocalRandom.current().nextInt(5, 10);
-        double givenGold = Math.round(ThreadLocalRandom.current().nextDouble(5, 25));
-
-        if (killerJson.getLevel().getRawNumber() != 120)
-            Bukkit.getPluginManager().callEvent(new PlayerGainXpEvent(killer, givenXp));
-
-        killerJson.setGold(killerJson.getGold() + givenGold);
-        killerJson.getData().put("all_gold", (int) killerJson.getData().computeIfAbsent("all_gold", s -> 0) + givenGold);
-
-        String message = String.format("on %s &b+%sXP &6+%sg",
-                playerJson.getFormattedLevel(false, true) + " " + playerJson.getRank().getColor() + player.getName(),
-                givenXp, NumberFormat.getInstance().format(givenGold));
-
-        killer.sendMessage(Text.pit("KILL", message, ChatColor.GREEN));
-
-        killer.playSound(killer.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 2);
-
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            player.spigot().respawn();
-            player.teleport(gameMap.getMapConfiguration().getSpawnPoint().toBukkitPoint(gameMap.getWorld()));
-        }, 1);
+    @EventHandler
+    public void onHunger(FoodLevelChangeEvent event){
+        if(event.getFoodLevel() != 20)
+            event.setFoodLevel(20);
+        event.setCancelled(true);
     }
 
     @EventHandler

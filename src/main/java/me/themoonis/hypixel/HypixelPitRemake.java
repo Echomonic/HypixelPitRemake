@@ -6,6 +6,10 @@ import dev.echo.concept.impl.ParserRegistry;
 import lombok.Getter;
 import lombok.Setter;
 import me.themoonis.hypixel.commands.*;
+import me.themoonis.hypixel.commands.gamemode.AdventureCommand;
+import me.themoonis.hypixel.commands.gamemode.CreativeCommand;
+import me.themoonis.hypixel.commands.gamemode.SpectatorCommand;
+import me.themoonis.hypixel.commands.gamemode.SurvivalCommand;
 import me.themoonis.hypixel.commands.parsers.ObjectParser;
 import me.themoonis.hypixel.commands.parsers.PlayerRankParser;
 import me.themoonis.hypixel.json.trackers.PlayerDataTracker;
@@ -87,7 +91,13 @@ public final class HypixelPitRemake extends JavaPlugin {
                 MapConfigurationCommand.class,
                 TestCommand.class,
                 XpCommand.class,
-                AdminSettingCommand.class
+                AdminSettingCommand.class,
+                TpAllCommand.class,
+                GameModeCommand.class,
+                AdventureCommand.class,
+                SpectatorCommand.class,
+                CreativeCommand.class,
+                SurvivalCommand.class
         };
 
         for (Class<?> commandClass : commandClasses)

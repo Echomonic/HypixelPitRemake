@@ -36,7 +36,7 @@ public class PlayerSidebar {
             int levelXp = data.isPrestige() ? data.getPrestige().getPrestigeXp() : data.getLevel().getLevelXp();
             return NumberFormat.getNumberInstance().format(levelXp - data.getXp());
         });
-        SidebarComponent gold = new KeyValueComponent("Gold", () -> "&6" + data.getGold() + "g");
+        SidebarComponent gold = new KeyValueComponent("Gold", () -> "&6" + NumberFormat.getNumberInstance().format(data.getGold()) + "g");
         SidebarComponent playerStatus = new KeyValueComponent("Status", () -> "&aIdling");
 
         SidebarComponent lines = SidebarComponent
